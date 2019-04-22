@@ -43,9 +43,10 @@ class CSK:
         self.y1 = self.y1 - dy
 
         # Training
-        #使用新的结果更新模型
-        xtemp = self.eta*self.crop(frame,self.x1,self.y1,self.width,self.height) + (1-self.eta)*self.x
-        self.x = self.crop(frame,self.x1,self.y1,self.width,self.height)
+        #使用新的结果更新模型,a存储中间结果
+        a = self.crop(frame,self.x1,self.y1,self.width,self.height)
+        xtemp = self.eta*a + (1-self.eta)*self.x
+        self.x = a
 
         self.alphaf = self.eta*self.training(self.x,self.y,0.2,0.01) + (1-self.eta)*self.alphaf # linearly interpolated
         self.x = xtemp
@@ -77,7 +78,8 @@ class CSK:
     def window(self,img):
         height = img.shape[0]
         width = img.shape[1]
-
+        print(height)
+        print(width)
         j = np.arange(0,width)
         i = np.arange(0,height)
         J, I = np.meshgrid(j,i)
@@ -117,7 +119,7 @@ class CSK:
         #可能是截取感兴趣区域，横向左右扩展半个宽度，纵向上下扩展半个宽度
         cropped = img[y_up:y_down,x_left:x_right]
         #如果在原图片上不能上下扩展半个高度/左右不能扩展半个宽度，则用边界值进行填充，已达扩展到足够大小
-        padded = np.pad(cropped,(pad_y,pad_x),'edge')
+        padded = np.pad(cropped,(pad_y,pad_x),'constant',constant_values=(122,122))
         windowed = self.window(padded)
         return windowed
 
